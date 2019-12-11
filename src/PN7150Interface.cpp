@@ -1,3 +1,13 @@
+// #############################################################################
+// ###                                                                       ###
+// ### NXP PN7150 Driver                                                     ###
+// ###                                                                       ###
+// ### https://github.com/Strooom/PN7150                                     ###
+// ### Author(s) : Pascal Roobrouck - @strooom                               ###
+// ### License : https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode ###
+// ###                                                                       ###
+// #############################################################################
+
 #include "PN7150Interface.h"									// NCI protocol runs over a hardware interface, in this case an I2C with 2 extra handshaking signals
 
 
