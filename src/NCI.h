@@ -1,13 +1,19 @@
 #ifndef NCI_h													// Header Guard
 #define NCI_h
 
-// License :
-//
-//
-// Author: Pascal Roobrouck - github.com/strooom
-//
-// Credits : Thomas Buhot, for his PN7120 library, the predecessor of the PN7150.
-//           Due to the NFC Specs not being available for free, I used his library to reverse-engineer some of the missing links.
+// #############################################################################
+// ###                                                                       ###
+// ### NXP PN7150 Driver                                                     ###
+// ###                                                                       ###
+// ### https://github.com/Strooom/PN7150                                     ###
+// ### Author(s) : Pascal Roobrouck - @strooom                               ###
+// ### License : https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode ###
+// ###                                                                       ###
+// ### Credits : Thomas Buhot, for his PN7120 library, the predecessor of    ###
+// ### the PN7150. Due to the NFC Specs not being available for free, I used ###
+// ### his library to reverse-engineer some of the missing information links ###
+// ###                                                                       ###
+// #############################################################################
 //
 // Summary :
 //   This library implements the NFC Controller Interface (NCI), which is a communication protocol between NFC hardware and a controlling Device Host

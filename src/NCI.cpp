@@ -1,3 +1,14 @@
+// #############################################################################
+// ###                                                                       ###
+// ### NXP PN7150 Driver                                                     ###
+// ###                                                                       ###
+// ### https://github.com/Strooom/PN7150                                     ###
+// ### Author(s) : Pascal Roobrouck - @strooom                               ###
+// ### License : https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode ###
+// ###                                                                       ###
+// #############################################################################
+
+
 #include "NCI.h"
 
 NCI::NCI(PN7150Interface &theHardwareInterface, NciApplicationMode theMode) : theHardwareInterface(theHardwareInterface), theMode(theMode),  theState(NciState::HwResetRfc)
