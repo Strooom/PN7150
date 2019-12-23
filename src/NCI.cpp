@@ -21,10 +21,7 @@ NCI::NCI(PN7150Interface &theHardwareInterface) : theHardwareInterface(theHardwa
 
 void NCI::initialize()
     {
-    if (theState == NciState::Error)			// If we are in Error state, we should re-initialize the Hardware interface, just to be safe..
-        {
-        theHardwareInterface.initialize();
-        }
+    theHardwareInterface.initialize();
     theState = NciState::HwResetRfc;
     }
 
@@ -122,7 +119,7 @@ void NCI::run()
                     getMessage();
                     printMessage(rxBuffer);
                     bool isOk = isMessageType(MsgTypeResponse, GroupIdProprietary, NCI_PROPRIETARY_ACT_RSP);			// Is the received Msg the correct type ?
-					isOk = isOk && (STATUS_OK == rxBuffer[3]);															// Is the received Status code Status_OK ?
+                    isOk = isOk && (STATUS_OK == rxBuffer[3]);															// Is the received Status code Status_OK ?
 
                     if (isOk)																		// if everything is OK...
                         {
@@ -182,7 +179,7 @@ void NCI::run()
             if (theHardwareInterface.hasMessage())
                 {
                 getMessage();
-				printMessage(rxBuffer, true);
+                printMessage(rxBuffer, true);
                 //theState = NciState::End;
                 //bool isOk = (4 == rxMessageLength);																	// Does the received Msg have the correct lenght ?
                 //isOk = isOk && isMessageType(MsgTypeNotification, GroupIdRfManagement, RfDiscoverNotification);		// Is the received Msg the correct type ?
@@ -240,7 +237,7 @@ bool NCI::isMessageType(uint8_t messageType, uint8_t groupId, uint8_t opcodeId)
 bool NCI::isTimeOut()
     {
     return false;
-	// TODO : implement and test timeout mechanism in NCI State Machine
+    // TODO : implement and test timeout mechanism in NCI State Machine
     //return ((millis() - timeOutStartTime) >= timeOut);
     }
 
