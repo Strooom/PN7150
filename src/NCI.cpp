@@ -4,7 +4,7 @@ NCI::NCI(PN7150Interface &theHardwareInterface, NciApplicationMode theMode) : th
     {
     }
 
-NCI::NCI(PN7150Interface &theHardwareInterface) : theHardwareInterface(theHardwareInterface), theMode(NciMode::CardReadWrite), theState(NciState::HwResetRfc)
+NCI::NCI(PN7150Interface &theHardwareInterface) : theHardwareInterface(theHardwareInterface), theMode(NciApplicationMode::CardReadWrite), theState(NciState::HwResetRfc)
     {
     }
 
@@ -229,6 +229,7 @@ bool NCI::isMessageType(uint8_t messageType, uint8_t groupId, uint8_t opcodeId)
 bool NCI::isTimeOut()
     {
     return false;
+	// TODO : implement and test timeout mechanism in NCI State Machine
     //return ((millis() - timeOutStartTime) >= timeOut);
     }
 
