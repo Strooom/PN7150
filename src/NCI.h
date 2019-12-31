@@ -25,6 +25,8 @@
 
 #include <Arduino.h>											// Gives us access to all typical Arduino types and functions
 #include "PN7150Interface.h"									// NCI protocol runs over a hardware interface.
+class NFCReaderWriter;
+//#include "NFCReaderWriter.h"									// NCI driver needs to report back to an application, eg. a ReaderWriter
 
 // ---------------------------------------------------------------------
 // NCI Packet Header Definitions. NCI Specification V1.0 - section 3.4.1
@@ -269,12 +271,14 @@
 // Dectivation Types for RF_DEACTIVATE_ NCI Specification V1.0 - Table 63
 // ----------------------------------------------------------------------
 
-#define IdleMode		0x00
-#define SleepMode		0x01
-#define Sleep_AFMode	0x02
-#define Discovery		0x03
+enum class NciRfDeAcivationMode : uint8_t
+    {
+    IdleMode =0x00,
+    SleepMode = 0x01,
+    Sleep_AFMode = 0x02,
+    Discovery = 0x03
 // 0x04 – 0xFF RFU
-
+    };
 
 // ----------------------------------------------------------------------
 // Dectivation Reason RF_DEACTIVATE_NTF NCI Specification V1.0 - Table 64
@@ -296,26 +300,26 @@
 #define NCI_DISCOVERY_TYPE_POLL_F_ACTIVE        0x05
 #define NCI_DISCOVERY_TYPE_POLL_ISO15693        0x06
 
-
-/* NCI Deactivation Type */
-#define NCI_DEACTIVATE_TYPE_IDLE        0   /* Idle Mode     */
-#define NCI_DEACTIVATE_TYPE_SLEEP       1   /* Sleep Mode    */
-#define NCI_DEACTIVATE_TYPE_SLEEP_AF    2   /* Sleep_AF Mode */
-#define NCI_DEACTIVATE_TYPE_DISCOVERY   3   /* Discovery     */
-
+enum class notificationType : uint8_t
+    {
+    lastNotification = 0x00,
+    lastNotificationNfccLimit = 0x01,
+    moreNotification = 0x02
+// 	3 - 255 RFU
+    };
 
 
 // ------------------------------------------------------------------------------------------
 // NFC Defines 3 types of applications. The NP7150 can operate them all in parallel if needed
 // ------------------------------------------------------------------------------------------
 
-enum class NciApplicationMode : uint8_t
-    {
-    None = 0x00,
-    CardReadWrite = 0x01,			// Using the PN7150 to simply read NFC or RFID cards
-    CardEmulate = 0x02,				// For Future Use, not yet implemented
-    PeerToPeer = 0x04				// For Future Use, not yet implemented
-    };
+//enum class NciApplicationMode : uint8_t
+//    {
+//    None = 0x00,
+//    CardReadWrite = 0x01,			// Using the PN7150 to simply read NFC or RFID cards
+//    CardEmulate = 0x02,				// For Future Use, not yet implemented
+//    PeerToPeer = 0x04				// For Future Use, not yet implemented
+//    };
 
 enum class CardType : uint8_t
     {
@@ -341,48 +345,56 @@ enum class NciState : uint8_t
     HwResetWfr,						// waiting for CORE_RESET_RSP
     SwResetRfc,						// send CORE_INIT_CMD
     SwResetWfr,						// waiting for CORE_INIT_RSP
-	EnableCustomCommandsRfc,		// Enabling PN7150-extensions
-	EnableCustomCommandsWfr,		// waiting for response/confirmation
-	RfIdleCmd,						// Core initialized, now waiting for RF configuration commands
-	RfIdleWfr,
-	RfGoToDiscoveryWfr,
-	RfDiscovery,
-	RfPollActive,
+    EnableCustomCommandsRfc,		// Enabling PN7150-extensions
+    EnableCustomCommandsWfr,		// waiting for response/confirmation
+    RfIdleCmd,						// Core initialized, now waiting for RF configuration commands
+    RfIdleWfr,
+    RfGoToDiscoveryWfr,
+    RfDiscovery,					// polling / detecting cards/tags
+    RfWaitForAllDiscoveries,		// busy enumerating multiple cards/tags being detected
+    RfWaitForHostSelect,			// done detecting multiple cards/tags, waiting for the DH to select one
+    RfPollActive,					// detected 1 card/tag, and activated it for reading/writing
 
+    RfDeActivateWfr,
     Error,
-	End
+    End
     };
 
 
 class NCI
     {
     public:
-        NCI(PN7150Interface &theHardwareInterface, NciApplicationMode theMode);					// Constructor
         NCI(PN7150Interface &theHardwareInterface);												// Constructor, with mode default set to CardReadwrite
         void initialize();																		// See NCI specification V1.0, section 4.1 & 4.2
+        void registrate(NFCReaderWriter *aReaderWriter);
         void run();																				// runs the NCI stateMachine
+        void deActivate(NciRfDeAcivationMode theMode);											// moves the StateMachine from PollActive or WaitingForHostSelect back into Idle
         NciState getState();																	// find out in which state the NCI stateMachine is
 
     private:
-        PN7150Interface &theHardwareInterface;													// reference to the object handling the hardware interface
-		NciApplicationMode theMode;																// in which way(s) are we going to use the PN7150..
-        NciState theState;																		// keeps track of the state of the NCI stateMachine - FSM
-        unsigned long timeOut;																	// keeps track of time-outs when waiting for responses from the NFC device
-		unsigned long timeOutStartTime;															// keeps track of time-outs when waiting for responses from the NFC device
-		uint8_t rxBuffer[MaxPayloadSize + MsgHeaderSize];										// buffer where we store bytes received until they form a complete message
-		uint32_t rxMessageLength;																// length of the last message received. As these are not 0x00 terminated, we need to remember the length
-        uint8_t txBuffer[MaxPayloadSize + MsgHeaderSize];										// buffer where we store the message to be transmitted
+        PN7150Interface &theHardwareInterface;																									// reference to the object handling the hardware interface
+        NFCReaderWriter *theReaderWriter = nullptr;																								// pointer to the object implementing the ReaderWriter application
+
+//		NFCTagEmulator &theTagEmulator = nullptr;																								// For future extension
+//		NFCPeer2Peer &thePeer2Peer = nullptr;																									// For future extension
+
+        NciState theState;																														// keeps track of the state of the NCI stateMachine - FSM
+        unsigned long timeOut;																													// keeps track of time-outs when waiting for responses from the NFC device
+        unsigned long timeOutStartTime;																											// keeps track of time-outs when waiting for responses from the NFC device
+        uint8_t rxBuffer[MaxPayloadSize + MsgHeaderSize];																						// buffer where we store bytes received until they form a complete message
+        uint32_t rxMessageLength;																												// length of the last message received. As these are not 0x00 terminated, we need to remember the length
+        uint8_t txBuffer[MaxPayloadSize + MsgHeaderSize];																						// buffer where we store the message to be transmitted
         void sendMessage(uint8_t messageType, uint8_t groupId, uint8_t opcodeId, uint8_t payloadData[], uint8_t payloadLength);
-        void sendMessage(uint8_t messageType, uint8_t groupId, uint8_t opcodeId);				// Variant for msg with no payload
-        void getMessage();																		// read message from I2C into rxBuffer and return how long it is
-		bool isMessageType(uint8_t messageType, uint8_t groupId, uint8_t opcodeId); 			// Is the msg in the rxBuffer of this type ?
-		bool isTimeOut();
-		void setTimeOut(unsigned long);
+        void sendMessage(uint8_t messageType, uint8_t groupId, uint8_t opcodeId);																// Variant for msg with no payload
+        void getMessage();																														// read message from I2C into rxBuffer
+        bool isMessageType(uint8_t messageType, uint8_t groupId, uint8_t opcodeId); 															// Is the msg in the rxBuffer of this type ?
+        void setTimeOut(unsigned long);
+        bool isTimeOut();
 
     public:
-        void test001();
-        void test002();
-  
+//       void test001();
+//       void test002();
+
     };
 
 

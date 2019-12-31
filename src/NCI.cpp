@@ -10,12 +10,10 @@
 
 
 #include "NCI.h"
+#include "NFCReaderWriter.h"
 
-NCI::NCI(PN7150Interface &theHardwareInterface, NciApplicationMode theMode) : theHardwareInterface(theHardwareInterface), theMode(theMode),  theState(NciState::HwResetRfc)
-    {
-    }
 
-NCI::NCI(PN7150Interface &theHardwareInterface) : theHardwareInterface(theHardwareInterface), theMode(NciApplicationMode::CardReadWrite), theState(NciState::HwResetRfc)
+NCI::NCI(PN7150Interface &theHardwareInterface) : theHardwareInterface(theHardwareInterface), theState(NciState::HwResetRfc)
     {
     }
 
@@ -23,6 +21,11 @@ void NCI::initialize()
     {
     theHardwareInterface.initialize();
     theState = NciState::HwResetRfc;
+    }
+
+void NCI::registrate(NFCReaderWriter *aReaderWriter)
+    {
+    theReaderWriter = aReaderWriter;
     }
 
 void NCI::run()
@@ -33,7 +36,6 @@ void NCI::run()
             {
             uint8_t payloadData[] = {ResetKeepConfig};										// CORE_RESET-CMD with Keep Configuration
             sendMessage(MsgTypeCommand, GroupIdCore, CORE_RESET_CMD, payloadData, 1);		//
-            printMessage(txBuffer);
             setTimeOut(10);																	// we should get a RESPONSE within 10 ms (it typically takes 2.3ms)
             theState = NciState::HwResetWfr;												// move to next state, waiting for the matching Response
             }
@@ -49,7 +51,6 @@ void NCI::run()
                 if (theHardwareInterface.hasMessage())
                     {
                     getMessage();
-                    printMessage(rxBuffer);
                     bool isOk = (6 == rxMessageLength);												// Does the received Msg have the correct lenght ?
                     isOk = isOk && isMessageType(MsgTypeResponse, GroupIdCore, CORE_RESET_RSP);		// Is the received Msg the correct type ?
                     isOk = isOk && (STATUS_OK == rxBuffer[3]);										// Is the received Status code Status_OK ?
@@ -69,7 +70,6 @@ void NCI::run()
         case NciState::SwResetRfc:
             {
             sendMessage(MsgTypeCommand, GroupIdCore, CORE_INIT_CMD);						// CORE_INIT-CMD
-            printMessage(txBuffer);
             setTimeOut(10);																	// we should get a RESPONSE within 10 ms, typically it takes 0.5ms
             theState = NciState::SwResetWfr;												// move to next state, waiting for response
             }
@@ -85,7 +85,6 @@ void NCI::run()
                 if (theHardwareInterface.hasMessage())
                     {
                     getMessage();
-                    printMessage(rxBuffer);
                     bool isOk = isMessageType(MsgTypeResponse, GroupIdCore, CORE_INIT_RSP);			// Is the received Msg the correct type ?
 
                     if (isOk)																		// if everything is OK...
@@ -102,7 +101,6 @@ void NCI::run()
 
         case NciState::EnableCustomCommandsRfc:
             sendMessage(MsgTypeCommand, GroupIdProprietary, NCI_PROPRIETARY_ACT_CMD);				// Send NCI_PROPRIETARY_ACT_CMD to activate extra PN7150-NCI features
-            printMessage(txBuffer);
             setTimeOut(10);																			// we should get a RESPONSE within 10 ms, typically it takes 0.5ms
             theState = NciState::EnableCustomCommandsWfr;											// move to next state, waiting for response
             break;
@@ -117,7 +115,6 @@ void NCI::run()
                 if (theHardwareInterface.hasMessage())
                     {
                     getMessage();
-                    printMessage(rxBuffer);
                     bool isOk = isMessageType(MsgTypeResponse, GroupIdProprietary, NCI_PROPRIETARY_ACT_RSP);			// Is the received Msg the correct type ?
                     isOk = isOk && (STATUS_OK == rxBuffer[3]);															// Is the received Status code Status_OK ?
 
@@ -133,69 +130,153 @@ void NCI::run()
                 }
             break;
 
-
         case NciState::RfIdleCmd:
             // After configuring, we instruct the NFCDevice to go into Poll mode..
             {
             uint8_t payloadData[] = { 3, NFC_A_PASSIVE_POLL_MODE, 0x01, NFC_B_PASSIVE_POLL_MODE, 0x01, NFC_F_PASSIVE_POLL_MODE, 0x01 };
+            // TODO : instead of setting a fixed scanning for these 3 types, we should request the to be scanned for types from the ReaderWriter configuration...
             sendMessage(MsgTypeCommand, GroupIdRfManagement, RF_DISCOVER_CMD, payloadData, 7);		//
-            printMessage(txBuffer);
-            setTimeOut(10);																			// we should get a RESPONSE within 10 ms ms
-            theState = NciState::RfIdleWfr;															// move to next state, waiting for Response
+            setTimeOut(10);																			// we should get a RESPONSE within 10 ms
+			theState = NciState::RfIdleWfr;															// move to next state, waiting for Response
             }
         break;
 
         case NciState::RfIdleWfr:
             if (isTimeOut())
                 {
-                theState = NciState::Error;													// time out waiting for response..
+				theState = NciState::Error;															// time out waiting for response..
                 }
             else
                 {
                 if (theHardwareInterface.hasMessage())
                     {
                     getMessage();
-                    printMessage(rxBuffer);
                     bool isOk = (4 == rxMessageLength);															// Does the received Msg have the correct lenght ?
                     isOk = isOk && isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DISCOVER_RSP);		// Is the received Msg the correct type ?
                     isOk = isOk && (STATUS_OK == rxBuffer[3]);													// Is the received Status code Status_OK ?
-                    if (isOk)																		// if everything is OK...
+					if (isOk)																		// if everything is OK...
                         {
                         theState = NciState::RfDiscovery;											// ...move to the next state
                         }
                     else																			// if not..
                         {
-                        theState = NciState::Error;													// .. goto error state
+						theState = NciState::Error;													// .. goto error state
                         }
                     }
                 }
             break;
 
-
         case NciState::RfDiscovery:
+            // TODO : if we have no NTF here, it means no cards are present and we can delete them from the list...
             // Here we don't check timeouts.. we can wait forever for a TAG/CARD to be presented..
-
-            // When a card is detected, we will get a notification
             if (theHardwareInterface.hasMessage())
                 {
                 getMessage();
-                printMessage(rxBuffer, true);
-                //theState = NciState::End;
-                //bool isOk = (4 == rxMessageLength);																	// Does the received Msg have the correct lenght ?
-                //isOk = isOk && isMessageType(MsgTypeNotification, GroupIdRfManagement, RfDiscoverNotification);		// Is the received Msg the correct type ?
-                //isOk = isOk && (StatusOk == rxBuffer[3]);																// Is the received Status code Status_OK ?
+                if (isMessageType(MsgTypeNotification, GroupIdRfManagement, RF_INTF_ACTIVATED_NTF))
+                    {
+                    // When a single tag/card is detected, the PN7150 will immediately activate it and send you this type of notification
+                    theReaderWriter->reportTagProperties(rxBuffer, RF_INTF_ACTIVATED_NTF);				// report the properties of this tag to the readerWriter application
+                    theState = NciState::RfPollActive;													// move to PollActive, and wait there for further commands..
+                    }
+                else if (isMessageType(MsgTypeNotification, GroupIdRfManagement, RF_DISCOVER_NTF))
+                    {
+                    // When multiple tags/cards are detected, the PN7150 will notify them all and wait for the DH to select one
+                    // The first card will have NotificationType == 2 and move the stateMachine to WaitForAllDiscoveries.
+                    // More notifications will come in that state
+                    theReaderWriter->reportTagProperties(rxBuffer, RF_DISCOVER_NTF);					// report the properties of this tag to the readerWriter application
+                    setTimeOut(10);																		// we should get more Notifications, so set a timeout so we don't wait forever
+                    theState = NciState::RfWaitForAllDiscoveries;
+                    }
                 }
+            break;
+
+        case NciState::RfWaitForAllDiscoveries:
+            if (isTimeOut())
+                {
+                theState = NciState::Error;				// We need a timeout here, in case the final RF_DISCOVER_NTF with Notification Type == 0 or 1 never comes...
+                }
+            else
+                {
+                if (theHardwareInterface.hasMessage())
+                    {
+                    getMessage();
+                    if (isMessageType(MsgTypeNotification, GroupIdRfManagement, RF_DISCOVER_NTF))
+                        {
+                        notificationType theNotificationType = (notificationType) rxBuffer[rxBuffer[6] + 7];		// notificationType comes in rxBuffer at the end, = 7 bytes + length of RF Technology Specific parameters which are in rxBuffer[6]
+                        switch (theNotificationType)
+                            {
+                            case notificationType::lastNotification:
+                            case notificationType::lastNotificationNfccLimit:
+                                theReaderWriter->reportTagProperties(rxBuffer, RF_DISCOVER_NTF);					// report the properties of this tag to the readerWriter application
+                                theState = NciState::RfWaitForHostSelect;
+                                break;
+
+                            case notificationType::moreNotification:
+                                theReaderWriter->reportTagProperties(rxBuffer, RF_DISCOVER_NTF);					// report the properties of this tag to the readerWriter application
+                                break;
+
+                            default:
+                                break;
+                            }
+                        }
+                    }
+                }
+            break;
+
+        case NciState::RfWaitForHostSelect:
+            // Multiple cards are present. We could select one and move into RfPollActive
             break;
 
         case NciState::RfPollActive:
             // A card is present, so we can read/write data to it. We could also receive a notification that the card has been removed..
             break;
 
-        case NciState::Error:
+        case NciState::RfDeActivateWfr:
+            if (isTimeOut())
+                {
+                theState = NciState::Error;				// We need a timeout here, in case the RF_DEACTIVATE_RSP never comes...
+                }
+            else
+                {
+                if (theHardwareInterface.hasMessage())
+                    {
+                    getMessage();
+                    if (isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DEACTIVATE_RSP))
+                        {
+						theState = NciState::RfIdleCmd;
+                        }
+                    else
+                        {
+                        }
+                    }
+                }
             break;
+
+        case NciState::Error:
+            // Something went wrong, and we made an emergency landing by moving to this state...
+            // To get out of it, the parent application can call initialize(), or we could decide to do that ourselves, maybe after some time-out
+			Serial.println("ErrorState...");
+			delay(500);
+			break;
 
         default:
             break;
+        }
+    }
+
+void NCI::deActivate(NciRfDeAcivationMode theMode)
+    {
+    // TODO : investigate how the different types of deactivation should behave
+    NciState tmpState = getState();
+    if ((NciState::RfPollActive == tmpState) || (NciState::RfWaitForHostSelect == tmpState))
+        {
+        uint8_t payloadData[] = { (uint8_t) theMode };
+        sendMessage(MsgTypeCommand, GroupIdRfManagement, RF_DEACTIVATE_CMD, payloadData, 1);	//
+        setTimeOut(10);																			// we should get a RESPONSE within 10 ms
+		theState = NciState::RfDeActivateWfr;													// move to next state, waiting for response
+        }
+    else
+        {
         }
     }
 
@@ -236,9 +317,7 @@ bool NCI::isMessageType(uint8_t messageType, uint8_t groupId, uint8_t opcodeId)
 
 bool NCI::isTimeOut()
     {
-    return false;
-    // TODO : implement and test timeout mechanism in NCI State Machine
-    //return ((millis() - timeOutStartTime) >= timeOut);
+    return ((millis() - timeOutStartTime) >= timeOut);
     }
 
 void NCI::setTimeOut(unsigned long theTimeOut)
@@ -247,74 +326,3 @@ void NCI::setTimeOut(unsigned long theTimeOut)
     timeOut = theTimeOut;
     }
 
-void NCI::test001()
-    {
-    Serial.println("Test 001 Cycle ---- Start");
-    theHardwareInterface.initialize();
-    initialize();
-    delay(10);
-    run();
-    Serial.println((uint8_t)getState());
-    delay(1);
-    run();
-    Serial.println((uint8_t)getState());
-    delay(1);
-    run();
-    Serial.println((uint8_t)getState());
-    delay(1);
-    run();
-    Serial.println((uint8_t)getState());
-    delay(1);
-    run();
-    Serial.println((uint8_t)getState());
-    delay(1);
-    run();
-    Serial.println((uint8_t)getState());
-    delay(1);
-    run();
-    Serial.println((uint8_t)getState());
-    delay(1);
-    run();
-    Serial.println((uint8_t)getState());
-    delay(1);
-    run();
-    Serial.println((uint8_t)getState());
-    delay(1);
-    run();
-    Serial.println((uint8_t)getState());
-    Serial.println("Test 001 Cycle ---- End");
-
-    delay(5000);
-    }
-
-void NCI::test002()
-    {
-    theLog.log("Test 002 Cycle ---- Start\n\n");
-    theHardwareInterface.initialize();
-    initialize();
-    delay(10);
-
-    for (uint8_t cycle = 0; cycle < 10; cycle++)
-        {
-        theLog.log(cycle);
-        theLog.log(" : State was : ");
-        printState(getState());
-
-        run();
-
-        theLog.log("State is : ");
-        printState(getState());
-        theLog.logNow("\n");
-
-        delay(10);
-        }
-
-    while (NciState::End != getState())
-        {
-        run();
-        delay(10);
-        }
-
-    theLog.logNow("Test 002 Cycle ---- End\n");
-    delay(5000);
-    }
