@@ -27,7 +27,7 @@ void setup()
     Serial.begin(155200);
     delay(50);
 
-    theLog.outputIsAvailable = true;
+    //theLog.outputIsAvailable = true;
 
     theReaderWriter.initialize();								// initialize the application object. It will will in its turn initialize the underlaying NCI object, and this one in its turn the HW interface object
     }
