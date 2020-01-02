@@ -46,28 +46,25 @@ void NCI::run()
         break;
 
         case NciState::HwResetWfr:
-            if (isTimeOut())
+            if (theHardwareInterface.hasMessage())
                 {
-                theState = NciState::Error;													// time out waiting for response..
-                }
-            else
-                {
-                if (theHardwareInterface.hasMessage())
-                    {
-                    getMessage();
-                    bool isOk = (6 == rxMessageLength);												// Does the received Msg have the correct lenght ?
-                    isOk = isOk && isMessageType(MsgTypeResponse, GroupIdCore, CORE_RESET_RSP);		// Is the received Msg the correct type ?
-                    isOk = isOk && (STATUS_OK == rxBuffer[3]);										// Is the received Status code Status_OK ?
+                getMessage();
+                bool isOk = (6 == rxMessageLength);												// Does the received Msg have the correct lenght ?
+                isOk = isOk && isMessageType(MsgTypeResponse, GroupIdCore, CORE_RESET_RSP);		// Is the received Msg the correct type ?
+                isOk = isOk && (STATUS_OK == rxBuffer[3]);										// Is the received Status code Status_OK ?
 
-                    if (isOk)																		// if everything is OK...
-                        {
-                        theState = NciState::SwResetRfc;											// ..move to the next state
-                        }
-                    else																			// if not..
-                        {
-                        theState = NciState::Error;													// goto error state
-                        }
+                if (isOk)																		// if everything is OK...
+                    {
+                    theState = NciState::SwResetRfc;											// ..move to the next state
                     }
+                else																			// if not..
+                    {
+                    theState = NciState::Error;													// goto error state
+                    }
+                }
+            else if (isTimeOut())
+                {
+                theState = NciState::Error;														// time out waiting for response..
                 }
             break;
 
@@ -80,26 +77,23 @@ void NCI::run()
         break;
 
         case NciState::SwResetWfr:
-            if (isTimeOut())
+            if (theHardwareInterface.hasMessage())
+                {
+                getMessage();
+                bool isOk = isMessageType(MsgTypeResponse, GroupIdCore, CORE_INIT_RSP);			// Is the received Msg the correct type ?
+
+                if (isOk)																		// if everything is OK...
+                    {
+                    theState = NciState::EnableCustomCommandsRfc;								// ...move to the next state
+                    }
+                else																			// if not..
+                    {
+                    theState = NciState::Error;													// .. goto error state
+                    }
+                }
+            else if (isTimeOut())
                 {
                 theState = NciState::Error;													// time out waiting for response..
-                }
-            else
-                {
-                if (theHardwareInterface.hasMessage())
-                    {
-                    getMessage();
-                    bool isOk = isMessageType(MsgTypeResponse, GroupIdCore, CORE_INIT_RSP);			// Is the received Msg the correct type ?
-
-                    if (isOk)																		// if everything is OK...
-                        {
-                        theState = NciState::EnableCustomCommandsRfc;								// ...move to the next state
-                        }
-                    else																			// if not..
-                        {
-                        theState = NciState::Error;													// .. goto error state
-                        }
-                    }
                 }
             break;
 
@@ -110,27 +104,24 @@ void NCI::run()
             break;
 
         case NciState::EnableCustomCommandsWfr:
-            if (isTimeOut())
+            if (theHardwareInterface.hasMessage())
+                {
+                getMessage();
+                bool isOk = isMessageType(MsgTypeResponse, GroupIdProprietary, NCI_PROPRIETARY_ACT_RSP);			// Is the received Msg the correct type ?
+                isOk = isOk && (STATUS_OK == rxBuffer[3]);															// Is the received Status code Status_OK ?
+
+                if (isOk)																		// if everything is OK...
+                    {
+                    theState = NciState::RfIdleCmd;												// ...move to the next state
+                    }
+                else																			// if not..
+                    {
+                    theState = NciState::Error;													// .. goto error state
+                    }
+                }
+            else if (isTimeOut())
                 {
                 theState = NciState::Error;															// time out waiting for response..
-                }
-            else
-                {
-                if (theHardwareInterface.hasMessage())
-                    {
-                    getMessage();
-                    bool isOk = isMessageType(MsgTypeResponse, GroupIdProprietary, NCI_PROPRIETARY_ACT_RSP);			// Is the received Msg the correct type ?
-                    isOk = isOk && (STATUS_OK == rxBuffer[3]);															// Is the received Status code Status_OK ?
-
-                    if (isOk)																		// if everything is OK...
-                        {
-                        theState = NciState::RfIdleCmd;												// ...move to the next state
-                        }
-                    else																			// if not..
-                        {
-                        theState = NciState::Error;													// .. goto error state
-                        }
-                    }
                 }
             break;
 
@@ -146,27 +137,24 @@ void NCI::run()
         break;
 
         case NciState::RfIdleWfr:
-            if (isTimeOut())
+            if (theHardwareInterface.hasMessage())
+                {
+                getMessage();
+                bool isOk = (4 == rxMessageLength);															// Does the received Msg have the correct lenght ?
+                isOk = isOk && isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DISCOVER_RSP);		// Is the received Msg the correct type ?
+                isOk = isOk && (STATUS_OK == rxBuffer[3]);													// Is the received Status code Status_OK ?
+                if (isOk)																		// if everything is OK...
+                    {
+                    theState = NciState::RfDiscovery;											// ...move to the next state
+                    }
+                else																			// if not..
+                    {
+                    theState = NciState::Error;													// .. goto error state
+                    }
+                }
+            else if (isTimeOut())
                 {
                 theState = NciState::Error;															// time out waiting for response..
-                }
-            else
-                {
-                if (theHardwareInterface.hasMessage())
-                    {
-                    getMessage();
-                    bool isOk = (4 == rxMessageLength);															// Does the received Msg have the correct lenght ?
-                    isOk = isOk && isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DISCOVER_RSP);		// Is the received Msg the correct type ?
-                    isOk = isOk && (STATUS_OK == rxBuffer[3]);													// Is the received Status code Status_OK ?
-                    if (isOk)																		// if everything is OK...
-                        {
-                        theState = NciState::RfDiscovery;											// ...move to the next state
-                        }
-                    else																			// if not..
-                        {
-                        theState = NciState::Error;													// .. goto error state
-                        }
-                    }
                 }
             break;
 
@@ -196,35 +184,32 @@ void NCI::run()
             break;
 
         case NciState::RfWaitForAllDiscoveries:
-            if (isTimeOut())
+            if (theHardwareInterface.hasMessage())
                 {
-                theState = NciState::Error;				// We need a timeout here, in case the final RF_DISCOVER_NTF with Notification Type == 0 or 1 never comes...
-                }
-            else
-                {
-                if (theHardwareInterface.hasMessage())
+                getMessage();
+                if (isMessageType(MsgTypeNotification, GroupIdRfManagement, RF_DISCOVER_NTF))
                     {
-                    getMessage();
-                    if (isMessageType(MsgTypeNotification, GroupIdRfManagement, RF_DISCOVER_NTF))
+                    notificationType theNotificationType = (notificationType)rxBuffer[rxBuffer[6] + 7];		// notificationType comes in rxBuffer at the end, = 7 bytes + length of RF Technology Specific parameters which are in rxBuffer[6]
+                    switch (theNotificationType)
                         {
-                        notificationType theNotificationType = (notificationType) rxBuffer[rxBuffer[6] + 7];		// notificationType comes in rxBuffer at the end, = 7 bytes + length of RF Technology Specific parameters which are in rxBuffer[6]
-                        switch (theNotificationType)
-                            {
-                            case notificationType::lastNotification:
-                            case notificationType::lastNotificationNfccLimit:
-                                theReaderWriter->reportTagProperties(rxBuffer, RF_DISCOVER_NTF);					// report the properties of this tag to the readerWriter application
-                                theState = NciState::RfWaitForHostSelect;
-                                break;
+                        case notificationType::lastNotification:
+                        case notificationType::lastNotificationNfccLimit:
+                            theReaderWriter->reportTagProperties(rxBuffer, RF_DISCOVER_NTF);					// report the properties of this tag to the readerWriter application
+                            theState = NciState::RfWaitForHostSelect;
+                            break;
 
-                            case notificationType::moreNotification:
-                                theReaderWriter->reportTagProperties(rxBuffer, RF_DISCOVER_NTF);					// report the properties of this tag to the readerWriter application
-                                break;
+                        case notificationType::moreNotification:
+                            theReaderWriter->reportTagProperties(rxBuffer, RF_DISCOVER_NTF);					// report the properties of this tag to the readerWriter application
+                            break;
 
-                            default:
-                                break;
-                            }
+                        default:
+                            break;
                         }
                     }
+                }
+            else if (isTimeOut())
+                {
+                theState = NciState::Error;				// We need a timeout here, in case the final RF_DISCOVER_NTF with Notification Type == 0 or 1 never comes...
                 }
             break;
 
@@ -237,66 +222,57 @@ void NCI::run()
             break;
 
         case NciState::RfDeActivate1Wfr:
-            if (isTimeOut())
+            if (theHardwareInterface.hasMessage())
+                {
+                getMessage();
+                if (isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DEACTIVATE_RSP))
+                    {
+                    theState = NciState::RfIdleCmd;
+                    }
+                else
+                    {
+                    }
+                }
+            else if (isTimeOut())
                 {
                 theState = NciState::Error;				// We need a timeout here, in case the RF_DEACTIVATE_RSP never comes...
-                }
-            else
-                {
-                if (theHardwareInterface.hasMessage())
-                    {
-                    getMessage();
-                    if (isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DEACTIVATE_RSP))
-                        {
-                        theState = NciState::RfIdleCmd;
-                        }
-                    else
-                        {
-                        }
-                    }
                 }
             break;
 
         case NciState::RfDeActivate2Wfr:
-            if (isTimeOut())
+            if (theHardwareInterface.hasMessage())
+                {
+                getMessage();
+                if (isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DEACTIVATE_RSP))
+                    {
+                    setTimeOut(10);
+                    theState = NciState::RfDeActivate2Wfn;
+                    }
+                else
+                    {
+                    }
+                }
+            else if (isTimeOut())
                 {
                 theState = NciState::Error;				// We need a timeout here, in case the RF_DEACTIVATE_RSP never comes...
-                }
-            else
-                {
-                if (theHardwareInterface.hasMessage())
-                    {
-                    getMessage();
-                    if (isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DEACTIVATE_RSP))
-                        {
-                        setTimeOut(10);
-                        theState = NciState::RfDeActivate2Wfn;
-                        }
-                    else
-                        {
-                        }
-                    }
                 }
             break;
 
         case NciState::RfDeActivate2Wfn:
-            if (isTimeOut())
+            if (theHardwareInterface.hasMessage())
+                {
+                getMessage();
+                if (isMessageType(MsgTypeNotification, GroupIdRfManagement, RF_DEACTIVATE_NTF))
+                    {
+                    theState = NciState::RfIdleCmd;
+                    }
+                else
+                    {
+                    }
+                }
+            else if (isTimeOut())
                 {
                 theState = NciState::Error;				// We need a timeout here, in case the RF_DEACTIVATE_RSP never comes...
-                }
-            else
-                {
-                if (theHardwareInterface.hasMessage())
-                    {
-                    getMessage();
-                    if (isMessageType(MsgTypeNotification, GroupIdRfManagement, RF_DEACTIVATE_NTF))
-                        {
-                        theState = NciState::RfIdleCmd;
-                        }
-                    else
-                        {
-                        }
-                    }
                 }
             break;
 
@@ -331,7 +307,7 @@ void NCI::deActivate(NciRfDeAcivationMode theMode)
             sendMessage(MsgTypeCommand, GroupIdRfManagement, RF_DEACTIVATE_CMD, payloadData, 1);	//
             setTimeOut(10);																			// we should get a RESPONSE within 10 ms
             theState = NciState::RfDeActivate2Wfr;													// move to next state, waiting for response
-		}
+            }
         break;
 
         default:
