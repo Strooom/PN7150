@@ -355,8 +355,10 @@ enum class NciState : uint8_t
     RfWaitForHostSelect,			// done detecting multiple cards/tags, waiting for the DH to select one
     RfPollActive,					// detected 1 card/tag, and activated it for reading/writing
 
-    RfDeActivateWfr,
-    Error,
+    RfDeActivate1Wfr,				// waiting for deactivation response, no notification will come (dactivation in RfWaitForHostSelect)
+	RfDeActivate2Wfr,				// waiting for deactivation response, additionally a notification will come (deactivation in RfPollActive)
+	RfDeActivate2Wfn,				// waiting for deactivation notifiation
+	Error,
     End
     };
 

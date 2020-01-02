@@ -61,7 +61,7 @@ void NFCReaderWriter::reportTagProperties(uint8_t msgBuffer[], uint8_t msgType)
         theTags[newTagIndex].uniqueIdLength = NfcId1Length;							// copy the length of the unique ID, is 4, 7 or 10
         for (uint8_t index = 0; index < NfcId1Length; index++)						// copy all bytes of the unique ID
             {
-            theTags[newTagIndex].uniqueId[index] = msgBuffer[offSet + index];
+            theTags[newTagIndex].uniqueId[index] = msgBuffer[offSet + 1 +index];
             }
         theTags[newTagIndex].detectionTimestamp = millis();
 
