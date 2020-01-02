@@ -9,8 +9,8 @@
 // #############################################################################
 
 
-#include "logging.h"											// Toolkit to allow easy logging towards, eg. Serial UART
-#include "NciToolkit.h"
+//#include "logging.h"											// Toolkit to allow easy logging towards, eg. Serial UART
+//#include "NciToolkit.h"
 
 
 #include "NCI.h"
