@@ -56,6 +56,10 @@ void NFCReaderWriter::reportTagProperties(uint8_t msgBuffer[], uint8_t msgType)
             }
 
         uint8_t NfcId1Length = msgBuffer[offSet];
+        if (NfcId1Length > 10)
+            {
+            NfcId1Length = 10;														// limit the length to 10, so in case of whatever error we don't write beyond the boundaries of the array
+            }
         uint8_t newTagIndex = nmbrOfTags;											// index to the array item where we will store the info
 
         theTags[newTagIndex].uniqueIdLength = NfcId1Length;							// copy the length of the unique ID, is 4, 7 or 10
