@@ -24,7 +24,7 @@ NFCReaderWriter theReaderWriter(theNCI);						// creates a global NFC Reader/Wri
 void setup()
     {
     delay(50);
-    Serial.begin(155200);
+    Serial.begin(115200);
     delay(50);
 
     //theLog.outputIsAvailable = true;
