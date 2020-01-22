@@ -11,21 +11,28 @@
 // ###                                                                       ###
 // #############################################################################
 
-
 // Summary :
 //   This library implements the hardware interface for the NXP PN7150 NFC device.
 //   The PN7150 uses I2C plus 2 additional data signals : IRQ and VEN
-//     IRQ :
-//     VEN :
+//     IRQ : output of the PN7150, input for the MCU. Through this signal the PN7150 signals it has data to be read by the MCU
+//     VEN : input of the PN7150, output for the MCU. Through this signal the MCU can RESET the PN7150
 //
 //   The library provides :
 //   * init() : Initialization of the interface
-//   * read()
-//   * write()
-//   * hasMessage() 
+//   * read() : Read message from PN7150 over I2C
+//   * write() : Write message to PN7150 over I2C
+//   * hasMessage() : Check if PN7150 has message waiting for MCU
 
 #include <Arduino.h>											// Gives us access to all typical Arduino types and functions
-#include <i2c_t3.h>												// the HW interface between The PN7150 and the DeviceHost is I2C, so we need the I2C library. As I'm developing this on Teensy3.2, i use that I2C library
+																// The HW interface between The PN7150 and the DeviceHost is I2C, so we need the I2C library.library
+#if defined(TEENSYDUINO) && defined(KINETISK)					// Teensy 3.0, 3.1, 3.2, 3.5, 3.6 :  Special, more optimized I2C library for Teensy boards
+#include <i2c_t3.h>												// Credits Brian "nox771" : see https://forum.pjrc.com/threads/21680-New-I2C-library-for-Teensy3
+#else
+#include <wire.h>												// Otherwise, just use the more standard Wire.h - For ESP32 this will link in a version dedicated for this MCU
+																// TODO :	i2c_t3.h ensures a maximum I2C message of 259, which is sufficient. Other I2C implementations have shorter buffers (32 bytes)
+																//			See : https://github.com/Strooom/PN7150/issues/7
+#endif
+
 
 class PN7150Interface
     {
@@ -33,9 +40,9 @@ class PN7150Interface
         PN7150Interface(uint8_t IRQpin, uint8_t VENpin);							// Constructor with default I2C address
         PN7150Interface(uint8_t IRQpin, uint8_t VENpin, uint8_t I2Caddress);		// Constructor with custom I2C address
         void initialize(void);														// Initialize the HW interface at the Device Host
-        uint8_t write(uint8_t data[], uint32_t dataLength);							// write data from DeviceHost to PN7150. Returns success (0) or Fail (> 0)
-        uint32_t read(uint8_t data[]);												// read data from PN7150
-        bool hasMessage();															// does the PN7150 indicate it has data for the DeviceHost to be read
+        uint8_t write(uint8_t data[], uint32_t dataLength) const;					// write data from DeviceHost to PN7150. Returns success (0) or Fail (> 0)
+        uint32_t read(uint8_t data[]) const;										// read data from PN7150, returns the amount of bytes read
+        bool hasMessage() const;													// does the PN7150 indicate it has data for the DeviceHost to be read
 
     private:
         uint8_t IRQpin;											// MCU pin to which IRQ is connected
