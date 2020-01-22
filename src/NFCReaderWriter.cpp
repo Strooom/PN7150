@@ -148,4 +148,9 @@ void NFCReaderWriter::run()
         }
     }
 
+ReaderWriterState NFCReaderWriter::getRWState()
+{
+    return theState;
+}
+
 
