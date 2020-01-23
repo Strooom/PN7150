@@ -148,9 +148,9 @@ void NFCReaderWriter::run()
         }
     }
 
-ReaderWriterState NFCReaderWriter::getRWState()
-{
+ReaderWriterState NFCReaderWriter::getState() const
+    {
     return theState;
-}
+    }
 
 
