@@ -35,7 +35,7 @@ class NFCReaderWriter
         NFCReaderWriter(NCI &theNCI);						// constructor
         void initialize();									// initialize the Reader/Writer application. Will in its turn initialize the NCI layer and the HW interface on which the application relies
         void run();
-		ReaderWriterState getRWState();						// returns the actual state to trigger events like a sound
+		ReaderWriterState getState() const;					// returns the actual state to trigger events like a sound
     };
 
 #endif
