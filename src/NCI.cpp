@@ -334,6 +334,11 @@ void NCI::deActivate(NciRfDeAcivationMode theMode)
         }
     }
 
+ActiveStatus NCI::getActivationState() const
+{
+    return theActivityState;
+}
+
 NciState NCI::getState() const
     {
     return theState;
