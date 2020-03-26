@@ -141,7 +141,7 @@
 #define STATUS_NOT_INITIALIZED				0x04
 #define STATUS_SYNTAX_ERROR					0x05
 #define STATUS_SEMANTIC_ERROR				0x06
-// 0x07 â€“ 0x08 RFU
+// 0x07 – 0x08 RFU
 #define STATUS_INVALID_PARAM				0x09
 #define STATUS_MESSAGE_SIZE_EXCEEDED		0x0A
 // 0x0B - 0x9F RFU
@@ -176,7 +176,7 @@
 #define NFC_RF_TECHNOLOGY_B					0x01
 #define NFC_RF_TECHNOLOGY_F					0x02
 #define NFC_RF_TECHNOLOGY_15693				0x03
-// 0x04 â€“ 0x7F RFU
+// 0x04 – 0x7F RFU
 // 0x80 - 0xFE For proprietary use
 // 0xFF RFU
 
@@ -192,8 +192,8 @@
 // RFU	0x04
 #define NFC_F_ACTIVE_POLL_MODE					0x05
 #define NFC_15693_PASSIVE_POLL_MODE				0x06
-// 0x07 â€“ 0x6F RFU
-// 0x70 â€“ 0x7F Reserved for Proprietary Technologies in Poll Mode
+// 0x07 – 0x6F RFU
+// 0x70 – 0x7F Reserved for Proprietary Technologies in Poll Mode
 #define NFC_A_PASSIVE_LISTEN_MODE				0x80
 #define NFC_B_PASSIVE_LISTEN_MODE				0x81
 #define NFC_F_PASSIVE_LISTEN_MODE				0x82
@@ -201,8 +201,8 @@
 // RFU	0x84
 #define NFC_F_ACTIVE_LISTEN_MODE				0x85
 #define NFC_15693_PASSIVE_LISTEN_MODE			0x86
-// 0x87 â€“ 0xEF RFU
-// 0xF0 â€“ 0xFF Reserved for Proprietary Technologies in Listen Mode
+// 0x87 – 0xEF RFU
+// 0xF0 – 0xFF Reserved for Proprietary Technologies in Listen Mode
 
 
 // ---------------------------------------------------
@@ -215,7 +215,7 @@
 #define PROTOCOL_T3T			0x03
 #define PROTOCOL_ISO_DEP		0x04
 #define PROTOCOL_NFC_DEP		0x05
-// 0x06 â€“ 0x7F RFU
+// 0x06 – 0x7F RFU
 // 0x80-0xFE For proprietary use
 // 0xFF RFU
 
@@ -228,7 +228,7 @@
 #define Frame_RF_interface			0x01
 #define ISO_DEP_RF_interface		0x02
 #define NFC_DEP_RF_interface		0x03
-// 0x04 â€“ 0x7F RFU
+// 0x04 – 0x7F RFU
 // 0x80 - 0xFE For proprietary use
 // 0xFF RFU
 
@@ -257,7 +257,7 @@
 #define NFC_BIT_RATE_1695	0x04
 #define NFC_BIT_RATE_3390	0x05
 #define NFC_BIT_RATE_6780	0x06
-// 0x07 â€“ 0x7F RFU
+// 0x07 – 0x7F RFU
 // 0x80 - 0xFE For proprietary use
 // 0xFF RFU
 
@@ -272,7 +272,7 @@ enum class NciRfDeAcivationMode : uint8_t
     SleepMode = 0x01,
     Sleep_AFMode = 0x02,
     Discovery = 0x03
-// 0x04 â€“ 0xFF RFU
+// 0x04 – 0xFF RFU
     };
 
 // ----------------------------------------------------------------------
@@ -283,7 +283,7 @@ enum class NciRfDeAcivationMode : uint8_t
 #define Endpoint_Request	0x01
 #define RF_Link_Loss		0x02
 #define NFC_B_Bad_AFI		0x03
-// 0x04 â€“ 0xFF RFU
+// 0x04 – 0xFF RFU
 
 
 /* Discovery Types/Detected Technology and Mode */
@@ -372,13 +372,6 @@ enum class TagsPresentStatus : uint8_t
     multipleTagsPresent
     };
 
-enum class ActiveStatus : uint8_t
-{
-    unknown,
-    active,
-    deactive
-};
-
 
 class NCI
     {
@@ -388,8 +381,7 @@ class NCI
         void run();												// runs the NCI stateMachine
         void activate();										// moves the StateMachine from Idle to Discover and starts the polling
         void deActivate(NciRfDeAcivationMode theMode);			// moves the StateMachine from PollActive or WaitingForHostSelect back into Idle
-    	ActiveStatus getActivationState() const;        		// returns the activation state     
-		NciState getState() const;								// find out in which state the NCI stateMachine is
+        NciState getState() const;								// find out in which state the NCI stateMachine is
         TagsPresentStatus getTagsPresentStatus() const;			// read-only get function for the (private) property
         uint8_t getNmbrOfTags() const;
         Tag* getTag(uint8_t index);								// TODO : improve this with 'const' so the Tag properties are read-only
@@ -419,8 +411,6 @@ class NCI
         Tag theTags[maxNmbrTags];								// array to store the data of a number of currently present tags. When uniqueIdLenght == 0 it means invalid data in this position of the array
         uint8_t nmbrOfTags = 0;									// how many tags are actually in the array
         void saveTag(uint8_t msgType);
-	
-	    ActiveStatus theActivityState = ActiveStatus::unknown;
     };
 
 
