@@ -25,7 +25,6 @@ void NCI::initialize()
     theState = NciState::HwResetRfc;														// re-initializing the state, so we can re-initialize at anytime
     theTagsStatus = TagsPresentStatus::unknown;
     nmbrOfTags = 0;
-    theActivityState = ActiveStatus::active;
     }
 
 void NCI::run()
@@ -293,7 +292,6 @@ void NCI::activate()
         sendMessage(MsgTypeCommand, GroupIdRfManagement, RF_DISCOVER_CMD, payloadData, 9);		//
         setTimeOut(10);																			// we should get a RESPONSE within 10 ms
         theState = NciState::RfIdleWfr;															// move to next state, waiting for Response
-        theActivityState = ActiveStatus::active;                                                // confirm the activity status
         }
     else
         {
@@ -314,7 +312,6 @@ void NCI::deActivate(NciRfDeAcivationMode theMode)
             setTimeOut(10);																			// we should get a RESPONSE within 10 ms
             theTagsStatus = TagsPresentStatus::unknown;
             theState = NciState::RfDeActivate1Wfr;													// move to next state, waiting for response
-            theActivityState = ActiveStatus::deactive;                                                // confirm the activity status
             }
         break;
 
@@ -325,7 +322,6 @@ void NCI::deActivate(NciRfDeAcivationMode theMode)
             setTimeOut(10);																			// we should get a RESPONSE within 10 ms
             theTagsStatus = TagsPresentStatus::unknown;
             theState = NciState::RfDeActivate2Wfr;													// move to next state, waiting for response
-            theActivityState = ActiveStatus::deactive;                                              // confirm the activity status
             }
         break;
 
