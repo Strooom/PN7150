@@ -21,7 +21,9 @@ void NFCReaderWriter::initialize()
     {
     theNCI.initialize();								// initialize the NCI stateMachine and other. Will in its turn initialize the HW interface
     theState = ReaderWriterState::initializing;
+#if DEBUGLEVEL > 0
     Serial.println("NFC ReaderWriter initialised");
+#endif
     }
 
 void NFCReaderWriter::run()
@@ -37,7 +39,9 @@ void NFCReaderWriter::run()
                     {
                     theNCI.activate();
                     theState = ReaderWriterState::noTagPresent;
+#if DEBUGLEVEL > 0
                     Serial.println("Polling activated");
+#endif
                     }
                 break;
                 default:
@@ -61,25 +65,35 @@ void NFCReaderWriter::run()
 
                     for (uint8_t index = 0; index < nmbrTags; index++)
                         {
+#if DEBUGLEVEL > 0
                         Serial.print("  Tag[");
                         Serial.print(index);
                         Serial.print("] : ");
+#endif
                         tmpTag = theNCI.getTag(index);
                         tmpTag->print();
+#if DEBUGLEVEL > 0
                         Serial.println("");
+#endif
                         }
                     }
                 break;
                 case NciState::RfPollActive:
                     {
                     theState = ReaderWriterState::singleTagPresent;
+#if DEBUGLEVEL > 0
                     Serial.println("Single Tag detected :");
+#endif
 
                     Tag* tmpTag = nullptr;
+#if DEBUGLEVEL > 0
                     Serial.print("  Tag[0] : ");
+#endif
                     tmpTag = theNCI.getTag(0);
                     tmpTag->print();
+#if DEBUGLEVEL > 0
                     Serial.println("");
+#endif
                     }
                 break;
                 }
@@ -98,7 +112,9 @@ void NFCReaderWriter::run()
                     if (theNCI.getTagsPresentStatus() == TagsPresentStatus::noTagsPresent)
                         {
                         theState = ReaderWriterState::noTagPresent;
+#if DEBUGLEVEL > 0
                         Serial.println("Tag removed");
+#endif
                         }
                     break;
 
@@ -125,7 +141,9 @@ void NFCReaderWriter::run()
                     if (theNCI.getTagsPresentStatus() == TagsPresentStatus::noTagsPresent)
                         {
                         theState = ReaderWriterState::noTagPresent;
+#if DEBUGLEVEL > 0
                         Serial.println("Tags removed");
+#endif
                         }
                     break;
 
@@ -143,7 +161,9 @@ void NFCReaderWriter::run()
 
     if (theNCI.getState() == NciState::Error)
         {
+#if DEBUGLEVEL > 0
         Serial.println("Error : Re-initializing NCI");
+#endif
         theNCI.initialize();				// initialize the NCI stateMachine and other. Will in its turn initialize the HW interface
         }
     }
