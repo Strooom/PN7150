@@ -60,7 +60,7 @@ void NFCReaderWriter::run()
 
                     uint8_t nmbrTags = theNCI.getNmbrOfTags();
                     Serial.print(nmbrTags);
-                    Serial.println(" Tags detected :");
+                    Serial.println(" Tags detected");
 #if DEBUGLEVEL > 0
 					Tag* tmpTag = nullptr;
                     for (uint8_t index = 0; index < nmbrTags; index++)
@@ -79,7 +79,7 @@ void NFCReaderWriter::run()
                 case NciState::RfPollActive:
                     {
                     theState = ReaderWriterState::singleTagPresent;
-                    Serial.println("Single Tag detected :");
+                    Serial.println("Single Tag detected");
 #if DEBUGLEVEL > 0
                     Tag* tmpTag = nullptr;
                     Serial.print("  Tag[0] : ");
