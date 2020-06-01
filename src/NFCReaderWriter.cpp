@@ -58,40 +58,33 @@ void NFCReaderWriter::run()
                     {
                     theState = ReaderWriterState::multipleTagsPresent;
 
-                    Tag* tmpTag = nullptr;
                     uint8_t nmbrTags = theNCI.getNmbrOfTags();
                     Serial.print(nmbrTags);
                     Serial.println(" Tags detected :");
-
+#if DEBUGLEVEL > 0
+					Tag* tmpTag = nullptr;
                     for (uint8_t index = 0; index < nmbrTags; index++)
                         {
-#if DEBUGLEVEL > 0
+
                         Serial.print("  Tag[");
                         Serial.print(index);
                         Serial.print("] : ");
-#endif
-                        tmpTag = theNCI.getTag(index);
+                        tmpTag = theNCI.getTag(index);					
                         tmpTag->print();
-#if DEBUGLEVEL > 0
                         Serial.println("");
-#endif
                         }
+#endif
                     }
                 break;
                 case NciState::RfPollActive:
                     {
                     theState = ReaderWriterState::singleTagPresent;
-#if DEBUGLEVEL > 0
                     Serial.println("Single Tag detected :");
-#endif
-
-                    Tag* tmpTag = nullptr;
 #if DEBUGLEVEL > 0
+                    Tag* tmpTag = nullptr;
                     Serial.print("  Tag[0] : ");
-#endif
                     tmpTag = theNCI.getTag(0);
                     tmpTag->print();
-#if DEBUGLEVEL > 0
                     Serial.println("");
 #endif
                     }
