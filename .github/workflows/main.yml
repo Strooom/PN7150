@@ -1,0 +1,21 @@
+name: Arduino Library Checks
+on: [push, pull_request]
+jobs:
+  ArduinoLintjob:
+    name: Run Arduino Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          compliance: strict
+  arduino_ci:
+    name: Build_Examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Arduino-CI/action@stable-1.x
+        env:
+          EXPECT_EXAMPLES: true
+          CUSTOM_INIT_SCRIPT: install.sh
+#          EXPECT_UNITTESTS: true
