@@ -1,3 +1,7 @@
+[![Arduino CI](https://github.com/strooom/PN7150/workflows/Arduino%20Library%20Checks/badge.svg)](https://github.com/marketplace/actions/arduino_ci)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/strooom/PN7150?color=green)
+
+
 # PN7150
 Library/Driver for NXP PN7150 NFC device
 
