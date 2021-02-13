@@ -30,3 +30,13 @@ void Tag::print() const
         Serial.print(" ");
         }
     }
+
+uint8_t Tag::getLength() const{
+     uint8_t length = uniqueIdLength;
+     return length;
+ }
+
+ uint8_t Tag::getID(uint8_t index) const{
+     uint8_t value = uniqueId[index];
+     return value;
+ }
