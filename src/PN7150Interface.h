@@ -37,16 +37,16 @@
 class PN7150Interface
     {
     public:
-        PN7150Interface(uint8_t IRQpin, uint8_t VENpin);							// Constructor with default I2C address
-        PN7150Interface(uint8_t IRQpin, uint8_t VENpin, uint8_t I2Caddress);		// Constructor with custom I2C address
+        PN7150Interface(uint8_t IRQ, uint8_t VEN);							// Constructor with default I2C address
+        PN7150Interface(uint8_t IRQ, uint8_t VEN, uint8_t I2Caddress);		// Constructor with custom I2C address
         void initialize(void);														// Initialize the HW interface at the Device Host
         uint8_t write(uint8_t data[], uint32_t dataLength) const;					// write data from DeviceHost to PN7150. Returns success (0) or Fail (> 0)
         uint32_t read(uint8_t data[]) const;										// read data from PN7150, returns the amount of bytes read
         bool hasMessage() const;													// does the PN7150 indicate it has data for the DeviceHost to be read
 
     private:
-        uint8_t IRQpin;											// MCU pin to which IRQ is connected
-        uint8_t VENpin;											// MCU pin to which VEN is connected
+        uint8_t IRQ;											// MCU pin to which IRQ is connected
+        uint8_t VEN;											// MCU pin to which VEN is connected
         uint8_t I2Caddress;										// I2C Address at which the PN7150 is found. Default is 0x28, but can be adjusted by setting to pins at the device
 
     public:

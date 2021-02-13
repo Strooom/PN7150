@@ -11,25 +11,25 @@
 #include "PN7150Interface.h"									// NCI protocol runs over a hardware interface, in this case an I2C with 2 extra handshaking signals
 
 
-PN7150Interface::PN7150Interface(uint8_t IRQpin, uint8_t VENpin) : IRQpin(IRQpin), VENpin(VENpin), I2Caddress(0x28)
+PN7150Interface::PN7150Interface(uint8_t IRQ, uint8_t VEN) : IRQ(IRQ), VEN(VEN), I2Caddress(0x28)
     {
-    // Constructor, initializing IRQpin and VENpin and setting I2Caddress to a default value of 0x28
+    // Constructor, initializing IRQ and VEN and setting I2Caddress to a default value of 0x28
     }
 
-PN7150Interface::PN7150Interface(uint8_t IRQpin, uint8_t VENpin, uint8_t I2Caddress) : IRQpin(IRQpin), VENpin(VENpin), I2Caddress(I2Caddress)
+PN7150Interface::PN7150Interface(uint8_t IRQ, uint8_t VEN, uint8_t I2Caddress) : IRQ(IRQ), VEN(VEN), I2Caddress(I2Caddress)
     {
-    // Constructor, initializing IRQpin and VENpin and initializing I2Caddress to a custom value
+    // Constructor, initializing IRQ and VEN and initializing I2Caddress to a custom value
     }
 
 void PN7150Interface::initialize(void)
     {
-    pinMode(IRQpin, INPUT);												// IRQ goes from PN7150 to DeviceHost, so is an input
-    pinMode(VENpin, OUTPUT);											// VEN controls the PN7150's mode, so is an output
+    pinMode(IRQ, INPUT);												// IRQ goes from PN7150 to DeviceHost, so is an input
+    pinMode(VEN, OUTPUT);											// VEN controls the PN7150's mode, so is an output
 
     // PN7150 Reset procedure : see PN7150 datasheet 12.6.1, 12.6.2.2, Fig 18 and 16.2.2
-    digitalWrite(VENpin, LOW);											// drive VEN LOW... 
+    digitalWrite(VEN, LOW);											// drive VEN LOW... 
     delay(1);															// ...for at least 10us
-    digitalWrite(VENpin, HIGH);											// then VEN HIGH again, and wait for 2.5 ms for the device to boot and allow communication
+    digitalWrite(VEN, HIGH);											// then VEN HIGH again, and wait for 2.5 ms for the device to boot and allow communication
     delay(3);
 
     Wire.begin();														// Start I2C interface
@@ -37,7 +37,7 @@ void PN7150Interface::initialize(void)
 
 bool PN7150Interface::hasMessage() const
     {
-    return (HIGH == digitalRead(IRQpin));								// PN7150 indicates it has data by driving IRQ signal HIGH
+    return (HIGH == digitalRead(IRQ));								// PN7150 indicates it has data by driving IRQ signal HIGH
     }
 
 uint8_t PN7150Interface::write(uint8_t txBuffer[], uint32_t txBufferLevel) const
@@ -92,10 +92,10 @@ void PN7150Interface::test001()
     {
     Serial.println("Test 001 Cycle ---- Start");
     Serial.println("Driving VEN HIGH");
-    digitalWrite(VENpin, HIGH);
+    digitalWrite(VEN, HIGH);
     delay(2000);
     Serial.println("Driving VEN LOW");
-    digitalWrite(VENpin, LOW);
+    digitalWrite(VEN, LOW);
     delay(2000);
     Serial.println("Test 001 Cycle ---- End");
     }
@@ -105,7 +105,7 @@ void PN7150Interface::test002()
     {
     Serial.println("Test 002 Cycle ---- Start");
     Serial.println("Driving VEN HIGH");
-    digitalWrite(VENpin, HIGH);
+    digitalWrite(VEN, HIGH);
     delay(10);
     if (hasMessage())
         {
@@ -117,7 +117,7 @@ void PN7150Interface::test002()
         }
     delay(500);
     Serial.println("Driving VEN LOW");
-    digitalWrite(VENpin, LOW);
+    digitalWrite(VEN, LOW);
     delay(10);
     if (hasMessage())
         {
@@ -170,9 +170,9 @@ void PN7150Interface::test004()
 	Serial.println("Test 004 Cycle ---- Start");
 
 	// Reset the PN7150, otherwise you can only run this test once..
-	digitalWrite(VENpin, LOW);									// drive VEN LOW for at least 0.5 ms after power came up : datasheet table 16.2.3
+	digitalWrite(VEN, LOW);									// drive VEN LOW for at least 0.5 ms after power came up : datasheet table 16.2.3
 	delay(100);
-	digitalWrite(VENpin, HIGH);									// then VEN HIGH again, and wait for 2.5 ms for the device to boot and allow communication
+	digitalWrite(VEN, HIGH);									// then VEN HIGH again, and wait for 2.5 ms for the device to boot and allow communication
 	delay(50);
 
     if (hasMessage())
@@ -206,9 +206,9 @@ void PN7150Interface::test005()
     // I am using the reset behaviour of the NCI to test send and response here, as it is otherwise difficult to trigger a read
     Serial.println("Test 005 Cycle ---- Start");
 	// Reset the PN7150, otherwise you can only run this test once..
-	digitalWrite(VENpin, LOW);									// drive VEN LOW for at least 0.5 ms after power came up : datasheet table 16.2.3
+	digitalWrite(VEN, LOW);									// drive VEN LOW for at least 0.5 ms after power came up : datasheet table 16.2.3
 	delay(100);
-	digitalWrite(VENpin, HIGH);									// then VEN HIGH again, and wait for 2.5 ms for the device to boot and allow communication
+	digitalWrite(VEN, HIGH);									// then VEN HIGH again, and wait for 2.5 ms for the device to boot and allow communication
 	delay(50);
 
 	uint8_t tmpBuffer[] = { 0x20, 0x00, 0x01, 0x01 };
