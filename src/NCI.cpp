@@ -8,9 +8,9 @@ NCI::NCI(PN7150Interface& aHardwareInterface) : theHardwareInterface(aHardwareIn
 
 void NCI::initialize() {
     theHardwareInterface.initialize();
-    theState = NciState::HwResetRfc;        // re-initializing the state, so we can re-initialize at anytime
+    theState      = NciState::HwResetRfc;        // re-initializing the state, so we can re-initialize at anytime
     theTagsStatus = TagsPresentStatus::unknown;
-    nmbrOfTags = 0;
+    nmbrOfTags    = 0;
 }
 
 void NCI::run() {
@@ -19,19 +19,21 @@ void NCI::run() {
         {
             uint8_t payloadData[] = {ResetKeepConfig};                                       // CORE_RESET-CMD with Keep Configuration
             sendMessage(MsgTypeCommand, GroupIdCore, CORE_RESET_CMD, payloadData, 1);        //
-            setTimeOut(10);                                                                  // we should get a RESPONSE within 10 ms (it typically takes 2.3ms)
-            theState = NciState::HwResetWfr;                                                 // move to next state, waiting for the matching Response
+            theLog.output(loggingLevel::Debug, "NCI : CORE_RESET_CMD sent");
+            setTimeOut(20);                         // we should get a RESPONSE within 20 ms (it typically takes 2.3ms)
+            theState = NciState::HwResetWfr;        // move to next state, waiting for the matching Response
         } break;
 
         case NciState::HwResetWfr:
             if (theHardwareInterface.hasMessage()) {
                 getMessage();
-                bool isOk = (6 == rxMessageLength);                                                // Does the received Msg have the correct lenght ?
-                isOk = isOk && isMessageType(MsgTypeResponse, GroupIdCore, CORE_RESET_RSP);        // Is the received Msg the correct type ?
-                isOk = isOk && (STATUS_OK == rxBuffer[3]);                                         // Is the received Status code Status_OK ?
+                bool isOk = (6 == rxMessageLength);                                                     // Does the received Msg have the correct lenght ?
+                isOk      = isOk && isMessageType(MsgTypeResponse, GroupIdCore, CORE_RESET_RSP);        // Is the received Msg the correct type ?
+                isOk      = isOk && (STATUS_OK == rxBuffer[3]);                                         // Is the received Status code Status_OK ?
 
                 if (isOk)        // if everything is OK...
                 {
+                    theLog.output(loggingLevel::Debug, "NCI : CORE_RESET_RSP received");
                     theState = NciState::SwResetRfc;        // ..move to the next state
                 } else                                      // if not..
                 {
@@ -46,8 +48,9 @@ void NCI::run() {
 
         case NciState::SwResetRfc: {
             sendMessage(MsgTypeCommand, GroupIdCore, CORE_INIT_CMD);        // CORE_INIT-CMD
-            setTimeOut(10);                                                 // we should get a RESPONSE within 10 ms, typically it takes 0.5ms
-            theState = NciState::SwResetWfr;                                // move to next state, waiting for response
+            theLog.output(loggingLevel::Debug, "NCI : CORE_INIT_CMD sent");
+            setTimeOut(20);                         // we should get a RESPONSE within 20 ms, typically it takes 0.5ms
+            theState = NciState::SwResetWfr;        // move to next state, waiting for response
         } break;
 
         case NciState::SwResetWfr:
@@ -57,6 +60,7 @@ void NCI::run() {
 
                 if (isOk)        // if everything is OK...
                 {
+                    theLog.output(loggingLevel::Debug, "NCI : CORE_INIT_RSP received");
                     theState = NciState::EnableCustomCommandsRfc;        // ...move to the next state
                 } else                                                   // if not..
                 {
@@ -79,7 +83,7 @@ void NCI::run() {
             if (theHardwareInterface.hasMessage()) {
                 getMessage();
                 bool isOk = isMessageType(MsgTypeResponse, GroupIdProprietary, NCI_PROPRIETARY_ACT_RSP);        // Is the received Msg the correct type ?
-                isOk = isOk && (STATUS_OK == rxBuffer[3]);                                                      // Is the received Status code Status_OK ?
+                isOk      = isOk && (STATUS_OK == rxBuffer[3]);                                                 // Is the received Status code Status_OK ?
 
                 if (isOk) {                                // if everything is OK...
                     theState = NciState::RfIdleCmd;        // ...move to the next state
@@ -106,10 +110,10 @@ void NCI::run() {
         case NciState::RfIdleWfr:
             if (theHardwareInterface.hasMessage()) {
                 getMessage();
-                bool isOk = (4 == rxMessageLength);                                                         // Does the received Msg have the correct lenght ?
-                isOk = isOk && isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DISCOVER_RSP);        // Is the received Msg the correct type ?
-                isOk = isOk && (STATUS_OK == rxBuffer[3]);                                                  // Is the received Status code Status_OK ?
-                if (isOk)                                                                                   // if everything is OK...
+                bool isOk = (4 == rxMessageLength);                                                              // Does the received Msg have the correct lenght ?
+                isOk      = isOk && isMessageType(MsgTypeResponse, GroupIdRfManagement, RF_DISCOVER_RSP);        // Is the received Msg the correct type ?
+                isOk      = isOk && (STATUS_OK == rxBuffer[3]);                                                  // Is the received Status code Status_OK ?
+                if (isOk)                                                                                        // if everything is OK...
                 {
                     theState = NciState::RfDiscovery;        // ...move to the next state
                     setTimeOut(500);                         // set a timeout of 1 second. If it times out, it means no cards are present..
@@ -142,7 +146,7 @@ void NCI::run() {
                     saveTag(RF_DISCOVER_NTF);        // save properties of this Tag in the Tags array
                     setTimeOut(25);                  // we should get more Notifications ubt set a timeout so we don't wait forever
                     theTagsStatus = TagsPresentStatus::multipleTagsPresent;
-                    theState = NciState::RfWaitForAllDiscoveries;
+                    theState      = NciState::RfWaitForAllDiscoveries;
                 }
             } else if (isTimeOut()) {
                 theTagsStatus = TagsPresentStatus::noTagsPresent;        // this means no card has been detected for xxx millisecond, so we can conclude that no cards are present
@@ -252,7 +256,7 @@ void NCI::activate() {
 }
 
 void NCI::deActivate(NciRfDeAcivationMode theMode) {
-    nmbrOfTags = 0;
+    nmbrOfTags        = 0;
     NciState tmpState = getState();
     switch (tmpState) {
         case NciState::RfWaitForHostSelect: {
@@ -323,7 +327,7 @@ bool NCI::isTimeOut() const {
 
 void NCI::setTimeOut(unsigned long theTimeOut) {
     timeOutStartTime = millis();
-    timeOut = theTimeOut;
+    timeOut          = theTimeOut;
 }
 
 void NCI::saveTag(uint8_t msgType) {
@@ -363,6 +367,6 @@ void NCI::saveTag(uint8_t msgType) {
     }
 }
 
-bool NCI::newTagPresent() const { // returns true only if a new tag is present
+bool NCI::newTagPresent() const {        // returns true only if a new tag is present
     return (TagsPresentStatus::newTagPresent == theTagsStatus);
 }
