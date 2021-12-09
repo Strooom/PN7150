@@ -1,5 +1,4 @@
-#ifndef Tag_h												// Header Guard
-#define Tag_h
+#pragma once
 
 // #############################################################################
 // ###                                                                       ###
@@ -15,21 +14,22 @@
 // ###                                                                       ###
 // #############################################################################
 
+#include <Arduino.h>        // Gives us access to all typical Arduino types and functions
 
-#include <Arduino.h>										// Gives us access to all typical Arduino types and functions
+// Todo : upgrade everything to uint32 io uint8
 
+class Tag {
+  public:
+    static constexpr uint32_t maxUniqueIdLength{10U};        //
+    uint8_t uniqueIdLength{0};                               // How long is the NFCID1 of the tag. Can be 4, 7 or 10 bytes. Typically 4 or 7.
+    uint8_t uniqueId[maxUniqueIdLength]{0};                  // array to store the NFCID1. Maximum length is 10 bytes at this time..
+    unsigned long detectionTimestamp;                        // remembers the time at which the tag was detected
 
-class Tag
-{
-public:
-  uint8_t uniqueIdLength = 0;       // How long is the NFCID1 of the tag. Can be 4, 7 or 10 bytes. Typically 4 or 7.
-  uint8_t uniqueId[10];             // array to store the NFCID1. Maximum length is 10 bytes at this time..
-  unsigned long detectionTimestamp; // remembers the time at which the tag was detected
-
-public:
-  void print() const;                 // prints all properties of the tag to Serial
-  uint8_t getLength() const;          // returns the length of the UID
-  uint8_t getID(uint8_t index) const; // get the UID value at a certain index
+  public:
+    void print() const;                        // prints all properties of the tag to Serial
+    uint8_t getLength() const;                 // returns the length of the UID
+    uint8_t getID(uint8_t index) const;        // get the UID value at a certain index
+    void clear();                              // resets the datafields to their defaults
+    bool isSame(Tag *otherTag) const;          // compares this tag to another tag to see if they are identical
+    void dump() const;                         // send tag data to logging
 };
-
-#endif // End Header Guard

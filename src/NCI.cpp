@@ -19,8 +19,9 @@ void NCI::run() {
         {
             uint8_t payloadData[] = {ResetKeepConfig};                                       // CORE_RESET-CMD with Keep Configuration
             sendMessage(MsgTypeCommand, GroupIdCore, CORE_RESET_CMD, payloadData, 1);        //
-            setTimeOut(20);                                                                  // we should get a RESPONSE within 20 ms (it typically takes 2.3ms)
-            theState = NciState::HwResetWfr;                                                 // move to next state, waiting for the matching Response
+            //theLog.output(subSystems::nfc, loggingLevel::Debug, "NCI : CORE_RESET_CMD sent");
+            setTimeOut(20);                         // we should get a RESPONSE within 20 ms (it typically takes 2.3ms)
+            theState = NciState::HwResetWfr;        // move to next state, waiting for the matching Response
         } break;
 
         case NciState::HwResetWfr:
@@ -32,20 +33,22 @@ void NCI::run() {
 
                 if (isOk)        // if everything is OK...
                 {
+                    //theLog.output(loggingLevel::Debug, "NCI : CORE_RESET_RSP received");
                     theState = NciState::SwResetRfc;        // ..move to the next state
                 } else                                      // if not..
                 {
-                    theLog.snprintf(loggingLevel::Error, "NCI invalid response at line %d", __LINE__);
+                    theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI invalid response at line %d", __LINE__);
                     theState = NciState::Error;        // goto error state
                 }
             } else if (isTimeOut()) {
-                theLog.snprintf(loggingLevel::Error, "NCI no response at line %d", __LINE__);
+                theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI no response at line %d", __LINE__);
                 theState = NciState::Error;        // time out waiting for response..
             }
             break;
 
         case NciState::SwResetRfc: {
             sendMessage(MsgTypeCommand, GroupIdCore, CORE_INIT_CMD);        // CORE_INIT-CMD
+            //theLog.output(loggingLevel::Debug, "NCI : CORE_INIT_CMD sent");
             setTimeOut(20);                         // we should get a RESPONSE within 20 ms, typically it takes 0.5ms
             theState = NciState::SwResetWfr;        // move to next state, waiting for response
         } break;
@@ -57,14 +60,15 @@ void NCI::run() {
 
                 if (isOk)        // if everything is OK...
                 {
+                    //theLog.output(loggingLevel::Debug, "NCI : CORE_INIT_RSP received");
                     theState = NciState::EnableCustomCommandsRfc;        // ...move to the next state
                 } else                                                   // if not..
                 {
-                    theLog.snprintf(loggingLevel::Error, "NCI invalid response at line %d", __LINE__);
+                    theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI invalid response at line %d", __LINE__);
                     theState = NciState::Error;        // .. goto error state
                 }
             } else if (isTimeOut()) {
-                theLog.snprintf(loggingLevel::Error, "NCI no response at line %d", __LINE__);
+                theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI no response at line %d", __LINE__);
                 theState = NciState::Error;        // time out waiting for response..
             }
             break;
@@ -84,11 +88,11 @@ void NCI::run() {
                 if (isOk) {                                // if everything is OK...
                     theState = NciState::RfIdleCmd;        // ...move to the next state
                 } else {                                   // if not..
-                    theLog.snprintf(loggingLevel::Error, "NCI invalid response at line %d", __LINE__);
+                    theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI invalid response at line %d", __LINE__);
                     theState = NciState::Error;        // .. goto error state
                 }
             } else if (isTimeOut()) {
-                theLog.snprintf(loggingLevel::Error, "NCI no response at line %d", __LINE__);
+                theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI no response at line %d", __LINE__);
                 theState = NciState::Error;        // time out waiting for response..
             }
             break;
@@ -118,7 +122,7 @@ void NCI::run() {
                     theState = NciState::Error;        // .. goto error state
                 }
             } else if (isTimeOut()) {
-                theLog.snprintf(loggingLevel::Error, "NCI no response at line %d", __LINE__);
+                theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI no response at line %d", __LINE__);
                 theState = NciState::Error;        // time out waiting for response..
             }
             break;
@@ -172,7 +176,7 @@ void NCI::run() {
                     }
                 }
             } else if (isTimeOut()) {
-                theLog.snprintf(loggingLevel::Error, "NCI no response at line %d", __LINE__);
+                theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI no response at line %d", __LINE__);
                 theState = NciState::Error;        // We need a timeout here, in case the final RF_DISCOVER_NTF with Notification Type == 0 or 1 never comes...
             }
             break;
@@ -195,7 +199,7 @@ void NCI::run() {
                 } else {
                 }
             } else if (isTimeOut()) {
-                theLog.snprintf(loggingLevel::Error, "NCI no response at line %d", __LINE__);
+                theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI no response at line %d", __LINE__);
                 theState = NciState::Error;        // We need a timeout here, in case the RF_DEACTIVATE_RSP never comes...
             }
             break;
@@ -209,7 +213,7 @@ void NCI::run() {
                 } else {
                 }
             } else if (isTimeOut()) {
-                theLog.snprintf(loggingLevel::Error, "NCI no response at line %d", __LINE__);
+                theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI no response at line %d", __LINE__);
                 theState = NciState::Error;        // We need a timeout here, in case the RF_DEACTIVATE_RSP never comes...
             }
             break;
@@ -222,7 +226,7 @@ void NCI::run() {
                 } else {
                 }
             } else if (isTimeOut()) {
-                theLog.snprintf(loggingLevel::Error, "NCI no response at line %d", __LINE__);
+                theLog.snprintf(subSystems::nfc, loggingLevel::Error, "NCI no response at line %d", __LINE__);
                 theState = NciState::Error;        // We need a timeout here, in case the RF_DEACTIVATE_RSP never comes...
             }
             break;
