@@ -26,10 +26,10 @@ class Tag {
     unsigned long detectionTimestamp;                        // remembers the time at which the tag was detected
 
   public:
-    void print() const;                        // prints all properties of the tag to Serial
+    // void print() const;                        // prints all properties of the tag to Serial
     uint8_t getLength() const;                 // returns the length of the UID
     uint8_t getID(uint8_t index) const;        // get the UID value at a certain index
     void clear();                              // resets the datafields to their defaults
     bool isSame(Tag *otherTag) const;          // compares this tag to another tag to see if they are identical
-    void dump() const;                         // send tag data to logging
+    //v void dump() const;                         // send tag data to logging
 };

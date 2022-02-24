@@ -10,21 +10,20 @@
 
 #include "tag.h"
 
-extern uLog theLog;
 
-void Tag::print() const {
-    Serial.print("UniqueID = ");
-    for (uint8_t index = 0; index < uniqueIdLength; index++) {
-        uint8_t theValue = uniqueId[index];
-        if (theValue < 16) {
-            Serial.print("0x0");
-        } else {
-            Serial.print("0x");
-        }
-        Serial.print(theValue, HEX);
-        Serial.print(" ");
-    }
-}
+// void Tag::print() const {
+//     Serial.print("UniqueID = ");
+//     for (uint8_t index = 0; index < uniqueIdLength; index++) {
+//         uint8_t theValue = uniqueId[index];
+//         if (theValue < 16) {
+//             Serial.print("0x0");
+//         } else {
+//             Serial.print("0x");
+//         }
+//         Serial.print(theValue, HEX);
+//         Serial.print(" ");
+//     }
+// }
 
 uint8_t Tag::getLength() const {
     uint8_t length = uniqueIdLength;
@@ -58,11 +57,11 @@ bool Tag::isSame(Tag *otherTag) const {
     }
 }
 
-void Tag::dump() const {
-    char textLine[69] = "uniqueID =";
-    char textPart[8];
-    for (int i = 0; i < uniqueIdLength; i++) {
-        snprintf(textPart, 8, " 0x%02X", uniqueId[i]);
-        strcat(textLine, textPart);
-    }
-}
+// void Tag::dump() const {
+//     char textLine[69] = "uniqueID =";
+//     char textPart[8];
+//     for (int i = 0; i < uniqueIdLength; i++) {
+//         snprintf(textPart, 8, " 0x%02X", uniqueId[i]);
+//         strcat(textLine, textPart);
+//     }
+// }
