@@ -14,9 +14,9 @@
 // ###                                                                       ###
 // #############################################################################
 
-#include <Arduino.h>        // Gives us access to all typical Arduino types and functions
+#include <stdint.h>        // Gives us access to uint8_t types etc
 
-// Todo : upgrade everything to uint32 io uint8
+// Todo : upgrade everything to uint32 io uint8 as this is faster on 32-bit MCUs
 
 class Tag {
   public:

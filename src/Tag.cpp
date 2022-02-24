@@ -8,8 +8,7 @@
 // ###                                                                       ###
 // #############################################################################
 
-#include "Tag.h"
-#include "logging.h"
+#include "tag.h"
 
 extern uLog theLog;
 
@@ -66,5 +65,4 @@ void Tag::dump() const {
         snprintf(textPart, 8, " 0x%02X", uniqueId[i]);
         strcat(textLine, textPart);
     }
-    theLog.output(subSystems::nfc, loggingLevel::Debug, textLine);
 }

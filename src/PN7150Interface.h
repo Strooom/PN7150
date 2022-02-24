@@ -1,5 +1,4 @@
-#ifndef PN7150Interface_h												// Header Guard
-#define PN7150Interface_h
+#pragma once 
 
 // #############################################################################
 // ###                                                                       ###
@@ -23,12 +22,12 @@
 //   * write() : Write message to PN7150 over I2C
 //   * hasMessage() : Check if PN7150 has message waiting for MCU
 
-#include <Arduino.h>											// Gives us access to all typical Arduino types and functions
+#include <stdint.h>>											// Gives us access to uint8_t types etc.
 																// The HW interface between The PN7150 and the DeviceHost is I2C, so we need the I2C library.library
 #if defined(TEENSYDUINO) && defined(KINETISK)					// Teensy 3.0, 3.1, 3.2, 3.5, 3.6 :  Special, more optimized I2C library for Teensy boards
 #include <i2c_t3.h>												// Credits Brian "nox771" : see https://forum.pjrc.com/threads/21680-New-I2C-library-for-Teensy3
 #else
-#include <wire.h>												// Otherwise, just use the more standard Wire.h - For ESP32 this will link in a version dedicated for this MCU
+#include <Wire.h>												// Otherwise, just use the more standard Wire.h - For ESP32 this will link in a version dedicated for this MCU
 																// TODO :	i2c_t3.h ensures a maximum I2C message of 259, which is sufficient. Other I2C implementations have shorter buffers (32 bytes)
 																//			See : https://github.com/Strooom/PN7150/issues/7
 #endif
@@ -49,13 +48,13 @@ class PN7150Interface
         uint8_t VEN;											// MCU pin to which VEN is connected
         uint8_t I2Caddress;										// I2C Address at which the PN7150 is found. Default is 0x28, but can be adjusted by setting to pins at the device
 
-    public:
-        void test001();											// testing VEN output on the HW
-        void test002();											// testing IRQ input on the HW
-        void test003();											// testing the sending of an I2C message
-        void test004();											// testing the notification of data from the PN7150 by rising IRQ
-        void test005();											// sending CORE_RESET_CMD and checking if the PN7150 responds with CORE_RESET_RSP
+    // public:
+    //     void test001();											// testing VEN output on the HW
+    //     void test002();											// testing IRQ input on the HW
+    //     void test003();											// testing the sending of an I2C message
+    //     void test004();											// testing the notification of data from the PN7150 by rising IRQ
+    //     void test005();											// sending CORE_RESET_CMD and checking if the PN7150 responds with CORE_RESET_RSP
     };
 
-#endif															// End Header Guard
+
 
