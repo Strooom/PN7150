@@ -1,9 +1,10 @@
 name: Arduino Library Checks
-on: push:
-    pull_request:
-      branches: [ main ]
-      paths-ignore:
-      - 'README.md'
+on: 
+  push:
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+    - 'README.md'
 jobs:
   ArduinoLintjob:
     name: Run Arduino Lint
