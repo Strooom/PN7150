@@ -1,4 +1,4 @@
-#include "nci.h"
+#include "NCI.h"
 
 NCI::NCI(PN7150Interface& aHardwareInterface) : theHardwareInterface(aHardwareInterface), theState(NciState::HwResetRfc), theTagsStatus(TagsPresentStatus::unknown) {
 }
