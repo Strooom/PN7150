@@ -23,7 +23,7 @@
 //
 
 #include <stdint.h>                 // Gives us access to uint8_t types etc
-#include "tag.h"                    //
+#include "Tag.h"                    //
 #include "PN7150Interface.h"        // NCI protocol runs over a hardware interface.
 
 // ---------------------------------------------------------------------
