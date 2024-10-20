@@ -1,10 +1,11 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0 OR GPL-3.0-or-later
 // #############################################################################
 // ###                                                                       ###
 // ### NXP PN7150 Driver                                                     ###
 // ###                                                                       ###
 // ### https://github.com/Strooom/PN7150                                     ###
 // ### Author(s) : Pascal Roobrouck - @strooom                               ###
-// ### License : https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode ###
+// ### License : CC-BY-NC-SA-4.0 OR GPL-3.0-or-later                         ###
 // ###                                                                       ###
 // #############################################################################
 
@@ -27,7 +28,7 @@ void PN7150Interface::initialize(void)
     pinMode(VEN, OUTPUT);											// VEN controls the PN7150's mode, so is an output
 
     // PN7150 Reset procedure : see PN7150 datasheet 12.6.1, 12.6.2.2, Fig 18 and 16.2.2
-    digitalWrite(VEN, LOW);											// drive VEN LOW... 
+    digitalWrite(VEN, LOW);											// drive VEN LOW...
     delay(1);															// ...for at least 10us
     digitalWrite(VEN, HIGH);											// then VEN HIGH again, and wait for 2.5 ms for the device to boot and allow communication
     delay(3);

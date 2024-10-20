@@ -1,10 +1,11 @@
+// SPDX-License-Identifier: CC-BY-NC-SA-4.0 OR GPL-3.0-or-later
 // #############################################################################
 // ###                                                                       ###
 // ### NXP PN7150 Driver                                                     ###
 // ###                                                                       ###
 // ### https://github.com/Strooom/PN7150                                     ###
 // ### Author(s) : Pascal Roobrouck - @strooom                               ###
-// ### License : https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode ###
+// ### License : CC-BY-NC-SA-4.0 OR GPL-3.0-or-later                         ###
 // ###                                                                       ###
 // #############################################################################
 
