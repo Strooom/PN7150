@@ -12,6 +12,6 @@ This library is dual-licensed under the GNU General Public License v3.0 (or late
 OR Creative Commons Attribution Non Commercial Share Alike 4.0 International.
 You may choose either license at your option.
 
-See `LICENSE-CC-BY-NC-SA-4.0.txt` and `LICENSE-GPL-3.0.txt` for the full license texts.
+See `LICENSE-CC-BY-NC-SA-40.txt` and `LICENSE-GPL-30.txt` for the full license texts.
 
 SPDX-License-Identifier: CC-BY-NC-SA-4.0 OR GPL-3.0-or-later
